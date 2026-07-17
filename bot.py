@@ -19,6 +19,7 @@ log = logging.getLogger(__name__)
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]  # обязателен, без него бот не запустится
 START_BALANCE = 1000
+application = Application.builder().token(BOT_TOKEN).build()
 
 # --- Каталог: предметы и кейсы ---
 # value — виртуальные очки (внутриигровая валюта ⭐), начисляются в инвентарь
@@ -489,5 +490,4 @@ async def balance_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"⭐ Баланс: {row['balance']}")
 
 
-if __name__ == "__main__":
-    start()
+application.run_polling()
