@@ -489,4 +489,5 @@ async def balance_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"⭐ Баланс: {row['balance']}")
 
 
-application.run_polling()
+if __name__ == "__main__":
+    start()
