@@ -485,4 +485,3 @@ async def balance_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def main():
- 
