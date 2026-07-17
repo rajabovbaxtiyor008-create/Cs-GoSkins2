@@ -20,16 +20,15 @@ log = logging.getLogger(__name__)
 BOT_TOKEN = os.environ["BOT_TOKEN"]  # обязателен, без него бот не запустится
 START_BALANCE = 1000
 
-# --- Каталог: предметы и кейсы ---
+# --- Каталог: предметы ---
 # value — виртуальные очки (внутриигровая валюта ⭐), начисляются в инвентарь
 # и используются для покупки кейсов / продажи предметов обратно.
 # market_price_usd — ориентировочная цена аналогичного предмета на Steam
 # Community Market (середина 2026 года). Реальные цены скинов постоянно
-# колеблются (зависят от float, стикеров, издания и т.д.), поэтому это
-# именно ориентир для атмосферы, а не котировка в реальном времени.
-# Цены AWP | Dragon Lore и ★ Karambit | Doppler сверены с текущими
-# агрегаторами рынка (csmarketcap.com, steamanalyst.com); остальные —
-# усреднённые ориентировочные значения по палитре редкости.
+# колеблются (float, стикеры, издание), поэтому это ориентир, а не
+# котировка в реальном времени. Цены AWP | Dragon Lore и ★ Karambit |
+# Doppler сверены с текущими агрегаторами рынка (csmarketcap.com,
+# steamanalyst.com); остальные — усреднённые ориентировочные значения.
 # Никакого вывода в реальные деньги/скины — только коллекционная механика.
 ITEMS = {
     # --- Обычные (common) ⚪ ---
@@ -81,57 +80,51 @@ RARITY_LABELS = {
     "glove": "Перчатки",
 }
 
+# --- Кейсы ---
+# Каждый кейс теперь заточен под свою редкость:
+# GRASS -> обычные, ROCK -> необычные, IRON -> редкие,
+# DIAMOND -> эпические + легендарные, KNIFES -> ножи + перчатки
+# (для перчаток отдельного кейса не просили — добавлены сюда же, как
+# вторая топовая ★-категория).
 CASES = {
     "grass": {
         "name": "🟩 GRASS",
-        "price": 300,
+        "price": 20,
         "odds": [
-            ("common_1", 45), ("common_2", 35), ("common_3", 30), ("common_4", 25), ("sticker_common_1", 20),
-            ("uncommon_1", 8), ("uncommon_2", 6), ("uncommon_3", 5), ("sticker_uncommon_1", 4),
-            ("rare_1", 0.3), ("rare_2", 0.25), ("rare_3", 0.2), ("sticker_rare_1", 0.15),
-            ("epic_1", 0.02), ("epic_2", 0.015), ("sticker_epic_1", 0.01),
-            ("legendary_1", 0.002), ("legendary_2", 0.0015),
-            ("knife_1", 0.0005), ("knife_2", 0.0004), ("knife_3", 0.0004),
-            ("glove_1", 0.0004), ("glove_2", 0.0004),
+            ("common_1", 25), ("common_2", 25), ("common_3", 20),
+            ("common_4", 20), ("sticker_common_1", 10),
         ],
     },
     "rock": {
         "name": "🪨 ROCK",
-        "price": 750,
+        "price": 90,
         "odds": [
-            ("common_1", 30), ("common_2", 25), ("common_3", 20), ("common_4", 18), ("sticker_common_1", 15),
-            ("uncommon_1", 18), ("uncommon_2", 15), ("uncommon_3", 13), ("sticker_uncommon_1", 10),
-            ("rare_1", 3), ("rare_2", 2.5), ("rare_3", 2), ("sticker_rare_1", 1.5),
-            ("epic_1", 0.08), ("epic_2", 0.06), ("sticker_epic_1", 0.05),
-            ("legendary_1", 0.008), ("legendary_2", 0.006),
-            ("knife_1", 0.002), ("knife_2", 0.002), ("knife_3", 0.002),
-            ("glove_1", 0.002), ("glove_2", 0.002),
+            ("uncommon_1", 30), ("uncommon_2", 28),
+            ("uncommon_3", 25), ("sticker_uncommon_1", 17),
         ],
     },
     "iron": {
         "name": "⚙️ IRON",
-        "price": 1500,
+        "price": 380,
         "odds": [
-            ("common_1", 18), ("common_2", 15), ("common_3", 12), ("common_4", 10), ("sticker_common_1", 8),
-            ("uncommon_1", 22), ("uncommon_2", 20), ("uncommon_3", 18), ("sticker_uncommon_1", 15),
-            ("rare_1", 10), ("rare_2", 8), ("rare_3", 7), ("sticker_rare_1", 5),
-            ("epic_1", 0.5), ("epic_2", 0.4), ("sticker_epic_1", 0.3),
-            ("legendary_1", 0.06), ("legendary_2", 0.05),
-            ("knife_1", 0.01), ("knife_2", 0.01), ("knife_3", 0.01),
-            ("glove_1", 0.01), ("glove_2", 0.01),
+            ("rare_1", 30), ("rare_2", 28),
+            ("rare_3", 25), ("sticker_rare_1", 17),
         ],
     },
     "diamond": {
         "name": "💎 DIAMOND",
-        "price": 3000,
+        "price": 1900,
         "odds": [
-            ("common_1", 4), ("common_2", 4), ("common_3", 3), ("common_4", 3), ("sticker_common_1", 3),
-            ("uncommon_1", 18), ("uncommon_2", 16), ("uncommon_3", 14), ("sticker_uncommon_1", 12),
-            ("rare_1", 22), ("rare_2", 20), ("rare_3", 18), ("sticker_rare_1", 15),
-            ("epic_1", 3), ("epic_2", 2.5), ("sticker_epic_1", 2),
-            ("legendary_1", 0.35), ("legendary_2", 0.3),
-            ("knife_1", 0.05), ("knife_2", 0.05), ("knife_3", 0.05),
-            ("glove_1", 0.05), ("glove_2", 0.05),
+            ("epic_1", 35), ("epic_2", 30), ("sticker_epic_1", 20),
+            ("legendary_1", 10), ("legendary_2", 5),
+        ],
+    },
+    "knifes": {
+        "name": "🔪 KNIFES",
+        "price": 3300,
+        "odds": [
+            ("knife_1", 15), ("knife_2", 25), ("knife_3", 25),
+            ("glove_1", 15), ("glove_2", 20),
         ],
     },
 }
@@ -240,6 +233,18 @@ def get_inventory(telegram_id: int, limit: int = 15):
     return rows
 
 
+def get_inventory_stats(telegram_id: int):
+    """Возвращает (кол-во предметов, суммарная стоимость) по ВСЕМУ инвентарю."""
+    conn = db()
+    rows = conn.execute(
+        "SELECT item_id FROM inventory WHERE telegram_id = ?", (telegram_id,)
+    ).fetchall()
+    conn.close()
+    count = len(rows)
+    total_value = sum(ITEMS[r["item_id"]]["value"] for r in rows)
+    return count, total_value
+
+
 def sell_item(telegram_id: int, row_id: int):
     """Продаёт один предмет из инвентаря по его id. Возвращает начисленную
     сумму или None, если предмет не найден / не принадлежит пользователю."""
@@ -291,6 +296,7 @@ def main_menu_keyboard():
         [InlineKeyboardButton(f"{c['name']} — {c['price']} ⭐", callback_data=f"case:{cid}")]
         for cid, c in CASES.items()
     ]
+    buttons.append([InlineKeyboardButton("👤 Профиль", callback_data="profile")])
     buttons.append([InlineKeyboardButton("🎒 Инвентарь", callback_data="inventory")])
     buttons.append([InlineKeyboardButton("🔗 Steam Trade", callback_data="trade")])
     return InlineKeyboardMarkup(buttons)
@@ -314,6 +320,7 @@ def after_open_keyboard(case_id: str):
 
 
 def case_preview_text(case_id: str) -> str:
+    """Список предметов кейса, аккуратно в столбик (по одному в строке)."""
     case = CASES[case_id]
     odds = case["odds"]
     total = sum(w for _, w in odds)
@@ -321,15 +328,15 @@ def case_preview_text(case_id: str) -> str:
     for item_id, w in odds:
         by_rarity.setdefault(ITEMS[item_id]["rarity"], []).append((item_id, w))
 
-    lines = []
+    blocks = []
     for rarity in RARITY_ORDER:
         group = by_rarity.get(rarity)
         if not group:
             continue
         prob = sum(w for _, w in group) / total * 100
-        names = ", ".join(f"{ITEMS[i]['emoji']} {ITEMS[i]['name']}" for i, _ in group)
-        lines.append(f"<b>{RARITY_LABELS[rarity]}</b> ({prob:.3f}%):\n{names}")
-    return "\n\n".join(lines)
+        item_lines = "\n".join(f"{ITEMS[i]['emoji']} {ITEMS[i]['name']}" for i, _ in group)
+        blocks.append(f"<b>{RARITY_LABELS[rarity]}</b> ({prob:.2f}%):\n{item_lines}")
+    return "\n\n".join(blocks)
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -354,6 +361,28 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         balance = get_balance(user_id)
         text = f"🏪 <b>Магазин кейсов</b>\n\n⭐ Баланс: <b>{balance}</b>\n\nВыбери кейс:"
         await query.edit_message_text(text, reply_markup=main_menu_keyboard(), parse_mode="HTML")
+        return
+
+    if data == "profile":
+        balance = get_balance(user_id)
+        count, total_value = get_inventory_stats(user_id)
+        trade_url = get_trade_url(user_id)
+        trade_status = "указан ✅" if trade_url else "не указан ❌"
+        text = (
+            f"👤 <b>Профиль</b>\n\n"
+            f"⭐ Баланс: <b>{balance}</b>\n"
+            f"🎒 Предметов в инвентаре: <b>{count}</b>\n"
+            f"💰 Стоимость инвентаря: <b>{total_value}</b> ⭐\n"
+            f"🔗 Steam Trade URL: {trade_status}"
+        )
+        keyboard = InlineKeyboardMarkup(
+            [
+                [InlineKeyboardButton("🎒 Инвентарь", callback_data="inventory")],
+                [InlineKeyboardButton("🔗 Steam Trade", callback_data="trade")],
+                [InlineKeyboardButton("⬅️ Назад", callback_data="back")],
+            ]
+        )
+        await query.edit_message_text(text, reply_markup=keyboard, parse_mode="HTML")
         return
 
     if data == "inventory":
@@ -432,7 +461,7 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text = (
             f"📦 <b>{case['name']}</b>\n"
             f"Цена: {case['price']} ⭐\n\n"
-            f"Возможные предметы по редкости:\n\n{case_preview_text(case_id)}"
+            f"Возможные предметы:\n\n{case_preview_text(case_id)}"
         )
         await query.edit_message_text(text, reply_markup=case_keyboard(case_id), parse_mode="HTML")
         return
@@ -484,21 +513,4 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-async def balance_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    row = get_or_create_user(update.effective_user.id, update.effective_user.username)
-    await update.message.reply_text(f"⭐ Баланс: {row['balance']}")
-
-
-def main():
-    init_db()
-    app = Application.builder().token(BOT_TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("balance", balance_cmd))
-    app.add_handler(CallbackQueryHandler(on_callback))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
-    log.info("Bot started")
-    app.run_polling()
-
-
-if __name__ == "__main__":
-    main()
+async def balance_cmd(update: Update, context: ContextTypes.DEFAUL
